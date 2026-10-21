@@ -8,12 +8,29 @@ import android.view.*;
 final class ModuleUiContext extends ContextThemeWrapper {
   private final Resources resources;
   private LayoutInflater inflater;
+  private Resources.Theme theme;
 
   ModuleUiContext(Context host) throws android.content.pm.PackageManager.NameNotFoundException {
     super(host, R.style.AppTheme);
     resources =
         host.createPackageContext(ConfigProvider.PACKAGE, Context.CONTEXT_IGNORE_SECURITY)
             .getResources();
+  }
+
+  @Override
+  public Resources.Theme getTheme() {
+    if (theme == null) {
+      // Copying the host Theme also copies unrelated 0x7f attribute IDs and can silently
+      // turn fitsSystemWindows on for every child, discarding explicit view padding.
+      theme = resources.newTheme();
+      theme.applyStyle(R.style.AppTheme, true);
+    }
+    return theme;
+  }
+
+  @Override
+  public void setTheme(int resource) {
+    getTheme().applyStyle(resource, true);
   }
 
   @Override

@@ -3,6 +3,8 @@ package dev.ryuya.galaxyservicepanel;
 import android.app.*;
 import android.content.*;
 import android.database.*;
+import android.graphics.drawable.*;
+import com.google.android.material.color.MaterialColors;
 import android.os.*;
 import android.view.*;
 import android.widget.*;
@@ -41,6 +43,8 @@ final class PanelController {
   private Preferences preferences;
   private boolean destroyed, attached, pending, querying, faulted, actionBarWasVisible, observing;
   private long settingsGeneration;
+  private Drawable originalBackground;
+  private int originalBarAppearance;
 
   static void created(Activity activity) {
     if (!"0011".equals(activity.getIntent().getStringExtra("keyString"))) return;
@@ -152,6 +156,10 @@ final class PanelController {
     ModuleUiContext context = new ModuleUiContext(host);
     LinearLayout nextRoot = new LinearLayout(context);
     nextRoot.setOrientation(LinearLayout.VERTICAL);
+    int surface =
+        MaterialColors.getColor(
+            context, com.google.android.material.R.attr.colorSurface, "ServicePanel");
+    nextRoot.setBackgroundColor(surface);
     MaterialToolbar toolbar = new MaterialToolbar(context);
     toolbar.setTitle(R.string.preview_title);
     toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material);
@@ -207,6 +215,16 @@ final class PanelController {
     ActionBar bar = host.getActionBar();
     actionBarWasVisible = bar != null && bar.isShowing();
     if (actionBarWasVisible) bar.hide();
+    originalBackground = host.getWindow().getDecorView().getBackground();
+    host.getWindow().setBackgroundDrawable(new ColorDrawable(surface));
+    var controller = host.getWindow().getInsetsController();
+    if (controller != null) {
+      originalBarAppearance = controller.getSystemBarsAppearance();
+      int mask =
+          WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+              | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+      controller.setSystemBarsAppearance(MaterialColors.isColorLight(surface) ? mask : 0, mask);
+    }
     content.removeAllViews();
     content.addView(root, new ViewGroup.LayoutParams(-1, -1));
     nativeAdapter.registerDataSetObserver(data);
@@ -271,6 +289,14 @@ final class PanelController {
     content.removeView(root);
     for (Child child : children) content.addView(child.view(), child.params());
     children.clear();
+    host.getWindow().setBackgroundDrawable(originalBackground);
+    var controller = host.getWindow().getInsetsController();
+    if (controller != null) {
+      int mask =
+          WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+              | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+      controller.setSystemBarsAppearance(originalBarAppearance, mask);
+    }
     if (actionBarWasVisible && host.getActionBar() != null) host.getActionBar().show();
     attached = false;
     panel = null;
