@@ -27,6 +27,9 @@ public final class MainActivity extends AppCompatActivity {
   private TabLayout tabs;
   private final List<View> pages = new ArrayList<>();
   private int font;
+  private boolean binding;
+  private final SharedPreferences.OnSharedPreferenceChangeListener changed =
+      (prefs, key) -> refreshStatus();
   private PanelView previewPanel;
 
   @Override
@@ -99,6 +102,7 @@ public final class MainActivity extends AppCompatActivity {
     master.addView(text(getString(R.string.enabled_note), false));
     enabled.setOnCheckedChangeListener(
         (button, checked) -> {
+          if (binding) return;
           ConfigProvider.settings(this).edit().putBoolean("enabled", checked).apply();
           ConfigProvider.changed(this);
           refreshStatus();
@@ -245,7 +249,9 @@ public final class MainActivity extends AppCompatActivity {
     var prefs = ConfigProvider.settings(this);
     boolean blocked = prefs.getBoolean("blocked", false);
     enabled.setEnabled(!blocked);
-    if (blocked && enabled.isChecked()) enabled.setChecked(false);
+    binding = true;
+    enabled.setChecked(!blocked && prefs.getBoolean("enabled", true));
+    binding = false;
     int message =
         blocked
             ? R.string.status_guard
@@ -266,6 +272,18 @@ public final class MainActivity extends AppCompatActivity {
                     DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
                         .format(new Date(time)));
     status.setText(getString(message) + stamp);
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    ConfigProvider.settings(this).registerOnSharedPreferenceChangeListener(changed);
+  }
+
+  @Override
+  protected void onStop() {
+    ConfigProvider.settings(this).unregisterOnSharedPreferenceChangeListener(changed);
+    super.onStop();
   }
 
   @Override
