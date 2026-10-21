@@ -17,6 +17,7 @@ final class PanelView extends LinearLayout {
   private final ListView list;
   private final Rows adapter = new Rows();
   private final MaterialTextView summary;
+  private final MaterialTextView note;
   private final IntConsumer selected;
   private final Consumer<Throwable> failed;
   private List<DiagnosticDocument.Row> rows = List.of();
@@ -32,7 +33,7 @@ final class PanelView extends LinearLayout {
     summary = text(context.getString(R.string.waiting_data), 20, true);
     summary.setPadding(dp(24), dp(18), dp(24), dp(4));
     addView(summary);
-    MaterialTextView note = text(context.getString(R.string.live_values), 12, false);
+    note = text(context.getString(R.string.live_values), 12, false);
     note.setTextColor(color(com.google.android.material.R.attr.colorOnSurfaceVariant));
     note.setPadding(dp(24), 0, dp(24), dp(14));
     addView(note);
@@ -86,6 +87,10 @@ final class PanelView extends LinearLayout {
           return true;
         });
     addView(list, new LayoutParams(-1, 0, 1));
+  }
+
+  void sampleMode() {
+    note.setText(R.string.preview_note);
   }
 
   void update(List<String> source, int textSize) {
@@ -217,7 +222,7 @@ final class PanelView extends LinearLayout {
         MaterialTextView name = text(value.label(), 11, false);
         name.setTextColor(color(com.google.android.material.R.attr.colorOnSurfaceVariant));
         cell.addView(name);
-        MaterialTextView amount = text(value.text(), font + 2, true);
+        MaterialTextView amount = text(value.text().replaceFirst(",\\s*$", ""), font + 2, true);
         amount.setPadding(0, dp(3), dp(6), 0);
         amount.setFontFeatureSettings("tnum");
         cell.addView(amount);

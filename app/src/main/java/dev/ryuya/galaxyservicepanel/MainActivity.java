@@ -27,6 +27,7 @@ public final class MainActivity extends AppCompatActivity {
   private TabLayout tabs;
   private final List<View> pages = new ArrayList<>();
   private int font;
+  private PanelView previewPanel;
 
   @Override
   public void onCreate(Bundle state) {
@@ -160,10 +161,15 @@ public final class MainActivity extends AppCompatActivity {
 
   private void preview() {
     LinearLayout page = vertical();
-    MaterialTextView caption = text(getString(R.string.preview_note), false);
-    caption.setPadding(dp(24), dp(12), dp(24), dp(12));
-    page.addView(caption);
-    PanelView panel = new PanelView(this, i -> {}, error -> {});
+    android.content.Context ui;
+    try {
+      ui = new ModuleUiContext(this);
+    } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+      ui = this;
+    }
+    PanelView panel = new PanelView(ui, i -> {}, error -> {});
+    previewPanel = panel;
+    panel.sampleMode();
     panel.update(sample(), font);
     page.addView(panel, new LinearLayout.LayoutParams(-1, 0, 1));
     addPage(R.string.preview_tab, page);
@@ -292,6 +298,7 @@ public final class MainActivity extends AppCompatActivity {
   }
 
   private void show(int selected) {
+    if (selected == 1 && previewPanel != null) previewPanel.update(sample(), font);
     for (int i = 0; i < pages.size(); i++)
       pages.get(i).setVisibility(i == selected ? View.VISIBLE : View.GONE);
   }
