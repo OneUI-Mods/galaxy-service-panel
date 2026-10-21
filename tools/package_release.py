@@ -62,17 +62,24 @@ def validate(apk, tools):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-ref", default="HEAD")
+    parser.add_argument("--check-release-apk", type=Path)
     args = parser.parse_args()
+    tools = (
+        Path(os.environ.get("ANDROID_HOME", Path.home() / "Library/Android/sdk"))
+        / "build-tools/37.0.0"
+    )
+    if args.check_release_apk:
+        apk = args.check_release_apk.resolve()
+        validate(apk, tools)
+        run(tools / "zipalign", "-c", "-P", "16", "4", apk)
+        print("Release APK structure verified; distribution still requires signing verification.")
+        return
     run("git", "diff", "--exit-code", args.source_ref, "--", ".")
     if run("git", "ls-files", "--others", "--exclude-standard", capture=True).stdout:
         raise RuntimeError("Commit all release sources first")
     signing = ROOT / ".signing"
     if not all((signing / f).is_file() for f in ["release.keystore", "password"]):
         raise RuntimeError("Missing private distribution key; see docs/releasing.md")
-    tools = (
-        Path(os.environ.get("ANDROID_HOME", Path.home() / "Library/Android/sdk"))
-        / "build-tools/37.0.0"
-    )
     run(
         ROOT / "gradlew",
         ":app:assembleRelease",

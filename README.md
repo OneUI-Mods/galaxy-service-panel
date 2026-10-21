@@ -20,7 +20,7 @@ libxposed API 102対応のVectorが必要です。モジュールの表示設定
 
 ## 導入
 
-署名済みrelease APKをインストールし、Vectorでモジュールと推奨対象「Service mode RIL」を有効にします。Samsungの電話キーパッドで `*#0011#` を入力します。
+[GitHub Release](https://github.com/ryuya0124/galaxy-service-panel/releases)から署名済みrelease APKをインストールし、Vectorでモジュールと推奨対象「Service mode RIL」を有効にします。Samsungの電話キーパッドで `*#0011#` を入力します。
 
 Service Modeは電話機能と同じプロセスで動きます。初回のフック読み込みにはそのプロセスがモジュールを読み込める状態になる必要があります。アプリから電話・SystemUI・端末を自動で再起動する処理は入れていません。
 
@@ -31,3 +31,7 @@ Service Modeは電話機能と同じプロセスで動きます。初回のフ�
 JDK 21 / SDK 37 / Gradle 9.6.1 / AGP 9.3.2。配布は [署名とリリース](docs/releasing.md) の手順を使用します。[設計と検証](docs/development.md) に実装の範囲と未検証事項を分けています。
 
 自作ソースはMIT。依存ライブラリはアプリ内のライセンス画面から個別に確認できます。SamsungやVectorの公式アプリではありません。
+
+## GitHubでの管理
+
+[非公開リポジトリ](https://github.com/ryuya0124/galaxy-service-panel)のmainを基準に管理します。GitHub Actionsでpush・Pull Request時に単体試験、lint、releaseビルド、依存ライセンス、APK構造を検証します。配布は署名を別途検証したrelease APKと、そのコミットに対応するソース・チェックサム・署名検証結果をGitHub Releaseへ添付します。署名鍵や実機の調査資料はリポジトリへ含めません。
