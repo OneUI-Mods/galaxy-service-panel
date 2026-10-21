@@ -283,6 +283,7 @@ final class PanelController {
       main.post(() -> fail(error));
       return;
     }
+    if (faulted || destroyed) return;
     faulted = true;
     // getView may fail during layout. Restore on the next main-loop turn, never within traversal.
     main.post(

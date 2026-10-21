@@ -47,21 +47,30 @@ final class PhoneGuard {
                 .getSystemService(ActivityManager.class)
                 .getHistoricalProcessExitReasons(ConfigProvider.TARGET, previousPid, 4);
         for (ApplicationExitInfo exit : exits) {
-          boolean fatal =
+          ExitEvidence.Reason reason =
               switch (exit.getReason()) {
-                case ApplicationExitInfo.REASON_CRASH,
-                    ApplicationExitInfo.REASON_CRASH_NATIVE,
-                    ApplicationExitInfo.REASON_ANR,
-                    ApplicationExitInfo.REASON_INITIALIZATION_FAILURE ->
-                    true;
-                case ApplicationExitInfo.REASON_SIGNALED ->
-                    exit.getStatus() == 6 || exit.getStatus() == 7 || exit.getStatus() == 11;
-                default -> false;
+                case ApplicationExitInfo.REASON_CRASH -> ExitEvidence.Reason.CRASH;
+                case ApplicationExitInfo.REASON_CRASH_NATIVE -> ExitEvidence.Reason.NATIVE_CRASH;
+                case ApplicationExitInfo.REASON_ANR -> ExitEvidence.Reason.ANR;
+                case ApplicationExitInfo.REASON_INITIALIZATION_FAILURE ->
+                    ExitEvidence.Reason.INITIALIZATION;
+                case ApplicationExitInfo.REASON_SIGNALED -> ExitEvidence.Reason.SIGNAL;
+                default -> ExitEvidence.Reason.OTHER;
               };
-          if (exit.getPid() == previousPid
-              && "com.android.phone".equals(exit.getProcessName())
-              && exit.getTimestamp() >= saved.getLong("armed_since", Long.MAX_VALUE))
-            times = CrashWindow.record(times, exit.getTimestamp(), now, fatal);
+          ExitEvidence evidence =
+              new ExitEvidence(
+                  exit.getPid(),
+                  exit.getProcessName(),
+                  exit.getTimestamp(),
+                  reason,
+                  exit.getStatus());
+          times =
+              CrashWindow.record(
+                  times,
+                  exit.getTimestamp(),
+                  now,
+                  evidence.countable(
+                      previousPid, saved.getLong("armed_since", Long.MAX_VALUE), now));
         }
       } catch (RuntimeException ignored) {
         // No evidence is not a crash. Never infer one from a new PID or a missing exit record.
