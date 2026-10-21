@@ -1,4 +1,6 @@
-plugins { id 'com.android.application' }
+plugins {
+    id 'com.android.application'
+}
 android {
     namespace 'dev.ryuya.galaxyservicepanel'
     compileSdk 37
@@ -10,10 +12,22 @@ android {
         versionCode 1
         versionName '0.1.0-experimental'
     }
-    buildFeatures { buildConfig true }
-    buildTypes { release { debuggable false; minifyEnabled false } }
-    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
-    lint { abortOnError true }
+    buildFeatures {
+        buildConfig true
+    }
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint {
+        abortOnError true
+    }
 }
 dependencies {
     compileOnly 'io.github.libxposed:api:102.0.0'
@@ -22,7 +36,12 @@ dependencies {
 }
 tasks.register('writeRuntimeDependencyList') {
     doLast {
-        def entries = configurations.releaseRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.collect { it.moduleVersion.id.toString() }.unique().sort()
-        def output = file('build/runtime-dependencies.txt'); output.parentFile.mkdirs(); output.text = entries.join('\n') + '\n'
+        def entries = configurations.releaseRuntimeClasspath.resolvedConfiguration.resolvedArtifacts
+                .collect { it.moduleVersion.id.toString() }
+                .unique()
+                .sort()
+        def output = file('build/runtime-dependencies.txt')
+        output.parentFile.mkdirs()
+        output.text = entries.join('\n') + '\n'
     }
 }

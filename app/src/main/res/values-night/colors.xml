@@ -1,1 +1,6 @@
-<resources><color name="panel_primary">#BACBFF</color><color name="panel_on_primary">#082453</color><color name="panel_primary_container">#23447A</color><color name="panel_on_primary_container">#DCE7FF</color></resources>
+<resources>
+  <color name="panel_primary">#BACBFF</color>
+  <color name="panel_on_primary">#082453</color>
+  <color name="panel_primary_container">#23447A</color>
+  <color name="panel_on_primary_container">#DCE7FF</color>
+</resources>
