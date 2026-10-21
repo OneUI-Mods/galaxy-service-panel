@@ -35,6 +35,14 @@ public final class HookEntry extends XposedModule {
                     return result;
                   }));
       handles.add(
+          hook(activity.getDeclaredMethod("onPause"))
+              .intercept(
+                  chain -> {
+                    Object result = chain.proceed();
+                    PanelController.paused((Activity) chain.getThisObject());
+                    return result;
+                  }));
+      handles.add(
           hook(activity.getDeclaredMethod("onDestroy"))
               .intercept(
                   chain -> {

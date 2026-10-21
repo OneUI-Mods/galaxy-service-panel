@@ -41,7 +41,14 @@ final class PanelController {
   private LinearLayout root;
   private PanelView panel;
   private Preferences preferences;
-  private boolean destroyed, attached, pending, querying, faulted, actionBarWasVisible, observing;
+  private boolean destroyed,
+      attached,
+      pending,
+      querying,
+      faulted,
+      actionBarWasVisible,
+      observing,
+      paused;
   private long settingsGeneration;
   private Drawable originalBackground;
   private int originalBarAppearance;
@@ -69,7 +76,36 @@ final class PanelController {
   static void resumed(Activity activity) {
     var ref = ACTIVE.get(activity);
     var controller = ref == null ? null : ref.get();
-    if (controller != null) controller.refresh();
+    if (controller != null) {
+      controller.paused = false;
+      try {
+        if (controller.attached && controller.preferences != null) {
+          if (!controller.guard.arm(controller.preferences.nonce())) {
+            controller.restore();
+            controller.faulted = true;
+            status(activity, "blocked");
+            return;
+          }
+          status(activity, "active");
+        }
+        controller.refresh();
+      } catch (Throwable error) {
+        controller.fail(error);
+      }
+    }
+  }
+
+  static void paused(Activity activity) {
+    var ref = ACTIVE.get(activity);
+    var controller = ref == null ? null : ref.get();
+    if (controller != null) {
+      controller.paused = true;
+      try {
+        controller.guard.disarm();
+      } catch (RuntimeException ignored) {
+      }
+      if (!controller.faulted) status(activity, "waiting");
+    }
   }
 
   static void destroyed(Activity activity) {
@@ -137,7 +173,7 @@ final class PanelController {
                   }
                   if (preferences != null && preferences.nonce() != next.nonce()) faulted = false;
                   preferences = next;
-                  if (faulted) return;
+                  if (faulted || paused) return;
                   if (!attached) attach();
                   schedule();
                 } catch (Throwable error) {

@@ -7,7 +7,7 @@ Android 17 / One UI 9のModemServiceModeで、ServiceModeAppは `com.android.pho
 ## 実装の境界
 
 - API 102のonPackageReadyを対象パッケージで判定します。共有電話プロセスの最初のパッケージとは限らないため、isFirstPackageだけでは絞りません。
-- 対象ActivityのonCreate/onResume/onDestroyだけを登録します。Activity全体や電話・モデムメソッドをフックしません。
+- 対象ActivityのonCreate/onResume/onPause/onDestroyだけを登録します。Activity全体や電話・モデムメソッドをフックしません。
 - Android 16/17のプロファイルは別に保持し、ListViewとArrayAdapterの構造が一致する場合だけ整形します。0011以外は触りません。
 - 純正アダプタと行リスナーを保持し、DataSetObserverで表示を追従します。clear/addAll/notifyを次のメインループへ集約し、空の中間通知で画面を消しません。定期ポーリングなし。
 - 空行を除いた表示にも元の行番号と原文を保存します。選択直前に純正の現在の行と一致を確認し、純正ListViewへ元番号を渡します。行が変化した場合は押下を実行せず再表示します。
@@ -16,7 +16,7 @@ Android 17 / One UI 9のModemServiceModeで、ServiceModeAppは `com.android.pho
 - ModuleUiContextはモジュールのResources/ClassLoaderとホストActivityのwindow tokenを組み合わせ、ホスト側AppCompatとの資源混在を避けます。
 - 設定Providerは表示設定のみ公開し、状態更新は自アプリと実際のSamsung電話UIDだけを許可します。設定IPCは専用worker、ビュー操作はメインスレッドです。
 - OFFは追加ビューとObserverを外し、純正の子ビュー・LayoutParams・ActionBarを復元します。監視用のActivityフックは再ON用に残ります。
-- 整形例外は電話プロセスへ伝播させず次のメインループで復元し、設定側の停止をラッチします。終了履歴の保護は、整形が付いていた区間の対応するPID・プロセス名・時刻・確認済みクラッシュ理由だけを使います。手動kill、正常終了、未確認理由、履歴重複は数えません。2分内3回で停止し、明示解除nonceで再開します。
+- 整形例外は電話プロセスへ伝播させず次のメインループで復元し、設定側の停止をラッチします。終了履歴の保護は、整形が表示中だった区間の対応するPID・プロセス名・時刻・確認済みクラッシュ理由だけを使います。他画面へ移った時点で監視区間を解除し、手動kill、正常終了、未確認理由、履歴重複は数えません。2分内3回で停止し、明示解除nonceで再開します。
 
 ## 検証
 
