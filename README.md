@@ -34,4 +34,4 @@ JDK 21 / SDK 37 / Gradle 9.6.1 / AGP 9.3.2。配布は [署名とリリース](d
 
 ## GitHubでの管理
 
-[非公開リポジトリ](https://github.com/ryuya0124/galaxy-service-panel)のmainを基準に管理します。GitHub Actionsでpush・Pull Request時に単体試験、lint、releaseビルド、依存ライセンス、APK構造を検証します。配布は署名を別途検証したrelease APKと、そのコミットに対応するソース・チェックサム・署名検証結果をGitHub Releaseへ添付します。署名鍵や実機の調査資料はリポジトリへ含めません。
+[公開リポジトリ](https://github.com/ryuya0124/galaxy-service-panel)のmainを基準に管理します。GitHub Actionsでpush・Pull Request時に単体試験、lint、releaseビルド、依存ライセンス、APK構造を検証します。配布は署名を別途検証したrelease APKと、そのコミットに対応するソース・チェックサム・署名検証結果をGitHub Releaseへ添付します。署名鍵や実機の調査資料はリポジトリへ含めません。
