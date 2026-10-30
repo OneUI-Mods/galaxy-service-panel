@@ -46,3 +46,5 @@ Javaはgoogle-java-format、PythonはBlackの100桁を使用します。対象OS
 ## ドキュメント一覧
 
 - [署名・配布手順](releasing.md)
+
+- [Kotlin移行の設計と検証範囲](kotlin-migration.md)
