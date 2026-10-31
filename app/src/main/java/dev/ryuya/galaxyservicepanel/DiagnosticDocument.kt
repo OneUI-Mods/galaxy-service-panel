@@ -23,11 +23,11 @@ object DiagnosticDocument {
             nativeRows
                 .stream()
                 .filter { obj: Any? -> Objects.nonNull(obj) }
-                .anyMatch { s: String? -> s!!.trim() == "BASIC INFORMATION" }
+                .anyMatch { s: String? -> TextCompatibility.strip(s!!) == "BASIC INFORMATION" }
         for (i in nativeRows.indices) {
             val raw = nativeRows.get(i)
-            if (raw == null || raw.isBlank()) continue
-            val text = raw.trim()
+            if (raw == null || TextCompatibility.isBlank(raw)) continue
+            val text = TextCompatibility.strip(raw)
             val upper = text.uppercase()
             if (selection) section = DiagnosticDocument.Section.SELECTION
             else if (upper.startsWith("LTE RRC") || upper.startsWith("LTE INFORMATION"))
@@ -65,8 +65,8 @@ object DiagnosticDocument {
                 val next: Int = if (i + 1 < matches.size) matches!!.get(i + 1)!![0] else raw.length
                 result.add(
                     DiagnosticDocument.Value(
-                        raw.substring(start, end - 1).trim(),
-                        raw.substring(end, next).trim(),
+                        TextCompatibility.strip(raw.substring(start, end - 1)),
+                        TextCompatibility.strip(raw.substring(end, next)),
                     )
                 )
             }
@@ -76,8 +76,8 @@ object DiagnosticDocument {
         if (colon > 0 && colon < raw.length - 1)
             return List.of<DiagnosticDocument.Value?>(
                 DiagnosticDocument.Value(
-                    raw.substring(0, colon).trim(),
-                    raw.substring(colon + 1).trim(),
+                    TextCompatibility.strip(raw.substring(0, colon)),
+                    TextCompatibility.strip(raw.substring(colon + 1)),
                 )
             )
         return java.util.List.of<DiagnosticDocument.Value?>()
@@ -91,7 +91,7 @@ object DiagnosticDocument {
             val text = row!!.text
             if (text!!.matches("(?i)Slot\\s+[0-9]+".toRegex())) slot = text
             if (text!!.startsWith("Serving PLMN") && text!!.contains("-"))
-                technology = text!!.substring(text!!.lastIndexOf('-') + 1).trim()
+                technology = TextCompatibility.strip(text!!.substring(text!!.lastIndexOf('-') + 1))
         }
         return if (slot.isEmpty()) technology
         else if (technology.isEmpty()) slot else slot + " · " + technology

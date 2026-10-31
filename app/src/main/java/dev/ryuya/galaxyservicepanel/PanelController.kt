@@ -184,7 +184,9 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                         snapshot!!
                             .stream()
                             .filter { obj: Any? -> Objects.nonNull(obj) }
-                            .anyMatch { s: String? -> s!!.trim() == "BASIC INFORMATION" }
+                            .anyMatch { s: String? ->
+                                TextCompatibility.strip(s!!) == "BASIC INFORMATION"
+                            }
                     )
                         host.finish()
                     else nativeMenu("Back")

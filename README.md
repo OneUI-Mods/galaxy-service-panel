@@ -34,3 +34,7 @@ Galaxy S26 Ultra（SM-S948Q）、Android 17 / One UI 9の対応するService Mod
 本体のライセンスは[LICENSE](LICENSE)、依存ライブラリの表記はアプリ内または同梱の第三者ライセンスを参照してください。Samsungの公式アプリではありません。
 
 [OneUI Modsのアプリ一覧](https://github.com/OneUI-Mods)
+
+## 文字列の互換性
+
+Service Modeの表示で、一部の空白文字を含む行が消えたり、項目の文字が削られたりする問題を修正しました。

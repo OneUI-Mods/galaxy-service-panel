@@ -36,11 +36,10 @@ class PhoneGuard(context: Context) {
         val previousPid = saved.getInt("pid", -1)
         var times: MutableList<Long?> = ArrayList()
         for (item in
-            saved
-                .getString("failures", "")!!
-                .split(",".toRegex())
-                .dropLastWhile { it.isEmpty() }
-                .toTypedArray()) try {
+            TextCompatibility.split(
+                saved.getString("failures", "")!!,
+                ",",
+            )) try {
             times.add(item.toLong())
         } catch (ignored: NumberFormatException) {}
         times = CrashWindow.record(times, 0, now, false)
