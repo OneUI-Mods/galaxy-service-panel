@@ -11,5 +11,9 @@
     </activity>
     <activity android:name=".LicensesActivity" android:exported="false" />
     <provider android:name=".ConfigProvider" android:authorities="dev.ryuya.galaxyservicepanel.config" android:exported="true" />
-  </application>
+          <provider android:name="dev.ryuya.galaxyservicepanel.compat.DexKitProvider" android:authorities="${applicationId}.dexkit" android:exported="true" />
+        <receiver android:name="dev.ryuya.galaxyservicepanel.compat.DexKitPackageReceiver" android:exported="false">
+            <intent-filter><action android:name="android.intent.action.PACKAGE_REPLACED"/><action android:name="android.intent.action.PACKAGE_ADDED"/><data android:scheme="package"/></intent-filter>
+        </receiver>
+    </application>
 </manifest>

@@ -1,7 +1,11 @@
 package dev.ryuya.galaxyservicepanel
 
 import android.app.Activity
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
+import dev.ryuya.galaxyservicepanel.compat.DexSymbols
+import dev.ryuya.galaxyservicepanel.compat.compatibleDeclaredMethod
 import io.github.libxposed.api.XposedInterface.Chain
 import io.github.libxposed.api.XposedInterface.HookHandle
 import io.github.libxposed.api.XposedInterface.Hooker
@@ -22,11 +26,23 @@ class HookEntry : XposedModule() {
         if (ConfigProvider.TARGET != param.getPackageName() || HookProfile.current() == null) return
         val loader = param.getClassLoader()
         if (!installed!!.add(loader)) return
+        val bootstrap =
+            Application::class.java.compatibleDeclaredMethod("attach", Context::class.java)
+        hook(bootstrap).intercept { chain ->
+            val result = chain.proceed()
+            val context = chain.args[0] as Context
+            DexSymbols.whenPrepared(context) { installActivity(loader) }
+            result
+        }
+    }
+
+    private fun installActivity(loader: ClassLoader) {
         val handles = ArrayList<HookHandle?>()
         try {
-            val activity = Class.forName(ConfigProvider.TARGET + ".ServiceModeApp", false, loader)
+            val activity =
+                DexSymbols.findClass(ConfigProvider.TARGET + ".ServiceModeApp", false, loader)
             handles.add(
-                hook(activity.getDeclaredMethod("onCreate", Bundle::class.java))
+                hook(activity.compatibleDeclaredMethod("onCreate", Bundle::class.java))
                     .intercept(
                         Hooker { chain: Chain? ->
                             val result = chain!!.proceed()
@@ -36,7 +52,7 @@ class HookEntry : XposedModule() {
                     )
             )
             handles.add(
-                hook(activity.getDeclaredMethod("onResume"))
+                hook(activity.compatibleDeclaredMethod("onResume"))
                     .intercept(
                         Hooker { chain: Chain? ->
                             val result = chain!!.proceed()
@@ -46,7 +62,7 @@ class HookEntry : XposedModule() {
                     )
             )
             handles.add(
-                hook(activity.getDeclaredMethod("onPause"))
+                hook(activity.compatibleDeclaredMethod("onPause"))
                     .intercept(
                         Hooker { chain: Chain? ->
                             val result = chain!!.proceed()
@@ -56,7 +72,7 @@ class HookEntry : XposedModule() {
                     )
             )
             handles.add(
-                hook(activity.getDeclaredMethod("onDestroy"))
+                hook(activity.compatibleDeclaredMethod("onDestroy"))
                     .intercept(
                         Hooker { chain: Chain? ->
                             PanelController.destroyed(chain!!.getThisObject() as Activity?)
