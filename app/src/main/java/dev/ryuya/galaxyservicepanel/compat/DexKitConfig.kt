@@ -1,12 +1,13 @@
 package dev.ryuya.galaxyservicepanel.compat
 
 internal object DexKitConfig {
-    const val SCHEMA = 1
+    const val SCHEMA = 2
     const val MODULE_ID = "dev.ryuya.galaxyservicepanel"
     val MODULE_VERSION
         get() = dev.ryuya.galaxyservicepanel.BuildConfig.VERSION_CODE
 
     const val PROFILE_HASH = "49e2df9461658daa9ada5987b286d90b321f0bbc72cf30ee9a29e69a5d65f79f"
+    val FEATURE_PREFIXES = setOf<String>()
     val TARGETS = setOf("com.sec.android.RilServiceModeApp")
     val HOSTS = setOf("com.sec.android.RilServiceModeApp")
     val CLASSES_BY_TARGET =
