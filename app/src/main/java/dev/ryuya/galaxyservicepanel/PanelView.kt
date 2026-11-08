@@ -44,6 +44,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
         java.util.List.of<DiagnosticDocument.Row?>()
     private var original: Boolean = false
     private var font: Int = 14
+    private var sourceLines: List<String?>? = null
 
     init {
         this.selected = selected
@@ -71,7 +72,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
                 override fun onTabUnselected(tab: Tab?) {}
 
                 override fun onTabReselected(tab: Tab?) {}
-            }
+            },
         )
         addView(tabs, android.widget.LinearLayout.LayoutParams(-1, -2))
         list = ListView(context)
@@ -84,7 +85,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
             OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
                 if (position < rows!!.size && !rows!!.get(position)!!.menuKey!!.isEmpty())
                     selected.accept(rows!!.get(position)!!.sourceIndex)
-            }
+            },
         )
         list.setOnItemLongClickListener(
             OnItemLongClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long
@@ -100,10 +101,10 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
                             OnClickListener { dialog: DialogInterface?, which: Int ->
                                 context
                                     .getSystemService<ClipboardManager?>(
-                                        ClipboardManager::class.java
+                                        ClipboardManager::class.java,
                                     )
                                     .setPrimaryClip(
-                                        ClipData.newPlainText("Service Mode", row!!.raw)
+                                        ClipData.newPlainText("Service Mode", row!!.raw),
                                     )
                             },
                         )
@@ -113,7 +114,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
                     failed.accept(error)
                 }
                 true
-            }
+            },
         )
         addView(list, android.widget.LinearLayout.LayoutParams(-1, 0, 1f))
     }
@@ -123,8 +124,12 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
     }
 
     fun update(source: MutableList<String?>?, textSize: Int) {
-        val next = DiagnosticDocument.parse(source!!)
+        val lines = source!!
         val nextFont = max(12, min(20, textSize))
+        if (sourceLines == lines && font == nextFont) return
+        val next = DiagnosticDocument.parse(lines)
+        // The native adapter may reuse a mutable list; retain a value snapshot, not that list.
+        sourceLines = lines.toList()
         if (rows == next && font == nextFont) return
         val first = list.getFirstVisiblePosition()
         val anchor: Int = if (first < rows!!.size) rows!!.get(first)!!.sourceIndex else -1
@@ -140,9 +145,9 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
                         if (rows!!.isEmpty()) R.string.waiting_data
                         else if (rows!!.get(0)!!.section === DiagnosticDocument.Section.SELECTION)
                             R.string.selection
-                        else R.string.preview_title
+                        else R.string.preview_title,
                     )
-            else status
+            else status,
         )
         adapter.notifyDataSetChanged()
         if (shapeChanged && anchor >= 0)
@@ -203,7 +208,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
         card.setCardElevation(0f)
         card.setStrokeWidth(0)
         card.setCardBackgroundColor(
-            color(com.google.android.material.R.attr.colorSurfaceContainerLow)
+            color(com.google.android.material.R.attr.colorSurfaceContainerLow),
         )
         val top = (if (start || original) dp(20) else 0).toFloat()
         val bottom = (if (end || original) dp(20) else 0).toFloat()
@@ -215,7 +220,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
                 .setTopRightCornerSize(top)
                 .setBottomLeftCornerSize(bottom)
                 .setBottomRightCornerSize(bottom)
-                .build()
+                .build(),
         )
         val body = vertical()
         body.setPadding(dp(20), dp(14), dp(20), dp(14))
@@ -248,7 +253,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
                     else row!!.text,
                     font,
                     false,
-                )
+                ),
             )
         } else if (row!!.values.size > 1) {
             val metrics = LinearLayout(getContext())
