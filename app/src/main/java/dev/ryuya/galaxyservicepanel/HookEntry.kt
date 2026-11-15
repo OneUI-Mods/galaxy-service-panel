@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import dev.ryuya.galaxyservicepanel.compat.DexSymbols
 import dev.ryuya.galaxyservicepanel.compat.compatibleDeclaredMethod
+import dev.ryuya.galaxyservicepanel.startup.FirstUnlockGate
 import io.github.libxposed.api.XposedInterface.Chain
 import io.github.libxposed.api.XposedInterface.HookHandle
 import io.github.libxposed.api.XposedInterface.Hooker
@@ -19,6 +20,7 @@ import kotlin.math.log
 
 /* Hooks only the Service Mode Activity; no system-wide Activity or telephony method hooks. */
 class HookEntry : XposedModule() {
+    private val firstUnlock = FirstUnlockGate()
     private val installed: MutableSet<ClassLoader?>? =
         Collections.newSetFromMap<ClassLoader?>(WeakHashMap<ClassLoader?, Boolean?>())
 
@@ -31,7 +33,9 @@ class HookEntry : XposedModule() {
         hook(bootstrap).intercept { chain ->
             val result = chain.proceed()
             val context = chain.args[0] as Context
-            DexSymbols.whenPrepared(context) { installActivity(loader) }
+            firstUnlock.run(context) {
+                DexSymbols.whenPrepared(context) { installActivity(loader) }
+            }
             result
         }
     }
@@ -48,8 +52,8 @@ class HookEntry : XposedModule() {
                             val result = chain!!.proceed()
                             PanelController.created(chain!!.getThisObject() as Activity)
                             result
-                        }
-                    )
+                        },
+                    ),
             )
             handles.add(
                 hook(activity.compatibleDeclaredMethod("onResume"))
@@ -58,8 +62,8 @@ class HookEntry : XposedModule() {
                             val result = chain!!.proceed()
                             PanelController.resumed(chain!!.getThisObject() as Activity)
                             result
-                        }
-                    )
+                        },
+                    ),
             )
             handles.add(
                 hook(activity.compatibleDeclaredMethod("onPause"))
@@ -68,8 +72,8 @@ class HookEntry : XposedModule() {
                             val result = chain!!.proceed()
                             PanelController.paused(chain!!.getThisObject() as Activity)
                             result
-                        }
-                    )
+                        },
+                    ),
             )
             handles.add(
                 hook(activity.compatibleDeclaredMethod("onDestroy"))
@@ -77,8 +81,8 @@ class HookEntry : XposedModule() {
                         Hooker { chain: Chain? ->
                             PanelController.destroyed(chain!!.getThisObject() as Activity?)
                             chain!!.proceed()
-                        }
-                    )
+                        },
+                    ),
             )
             log(
                 4,

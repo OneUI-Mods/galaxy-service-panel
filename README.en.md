@@ -4,6 +4,10 @@
 
 A Vector module that makes Samsung Service Mode, opened with `*#0011#` in the phone keypad, easier to read.
 
+## First unlock after boot
+
+Hook initialization that needs settings or cached discovery results waits for the first user unlock after boot. A later ordinary screen lock does not repeat initialization. Existing screen-off power-saving and security behavior is preserved. Unlock delivery is event-driven, with no polling or new resident service.
+
 ## Features
 
 - Separate SIM/connectivity, LTE, and NR sections with organized diagnostic values.
