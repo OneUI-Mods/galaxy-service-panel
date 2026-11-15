@@ -1,5 +1,7 @@
 # Galaxy Service Panel
 
+[日本語](README.md) · [English](README.en.md)
+
 Samsungの電話キーパッドから `*#0011#` で開くService Modeを、読みやすく整えるVectorモジュールです。
 
 ## できること
