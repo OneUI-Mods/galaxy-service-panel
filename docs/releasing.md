@@ -1,6 +1,6 @@
 # 署名とリリース
 
-JDK 21 / Android SDK 37で `python3 tools/package_release.py --source-ref HEAD` を実行します。アプリ、ツール、ドキュメントを先にコミットします。release variant、target SDK 37、非debuggable、検証Activity非混入、modern API 102 metadata、対象スコープ、依存ライセンス、16 KiB alignment、配布証明書を検証します。JVM単体試験にdebug variantのホスト用クラスを使用しますが、debug APKは配布しません。
+JDK 27 / Android SDK 37.2で `python3 tools/package_release.py --source-ref HEAD` を実行します。アプリ、ツール、ドキュメントを先にコミットします。release variant、target SDK 37.2、非debuggable、検証Activity非混入、modern API 102 metadata、対象スコープ、依存ライセンス、16 KiB alignment、配布証明書を検証します。JVM単体試験にdebug variantのホスト用クラスを使用しますが、debug APKは配布しません。
 
 秘密情報はGit対象外の `.signing/` のみに保存します。ディレクトリ0700、`release.keystore` と `password` は0600。aliasは `galaxyservicepanel-release`。鍵・パスワードをGitや配布物、ログへ出しません。以後も同じ鍵を使って上書き更新します。
 
@@ -12,7 +12,7 @@ JDK 21 / Android SDK 37で `python3 tools/package_release.py --source-ref HEAD` 
 
 ## GitHub Actionsと配布の区分
 
-非公開リポジトリのmain・Pull Request・手動実行で `.github/workflows/build.yml` を実行します。Actionは既存アプリと同じコミットへ固定し、ジョブの権限はcontents:readです。JDK 21、SDK 37で単体試験、lintRelease、assembleRelease、実runtime依存とライセンスの照合、APK構造とalignmentを検証します。
+非公開リポジトリのmain・Pull Request・手動実行で `.github/workflows/build.yml` を実行します。Actionは既存アプリと同じコミットへ固定し、ジョブの権限はcontents:readです。JDK 27、SDK 37.2で単体試験、lintRelease、assembleRelease、実runtime依存とライセンスの照合、APK構造とalignmentを検証します。
 
 `python3 tools/package_release.py --check-release-apk <apk>` は署名鍵なしでCIの構造検証だけを行います。この成功だけでは配布署名の確認にはなりません。CIではAPKの添付・自動Release作成を行わず、配布時は通常のpackage_release.pyで配布証明書まで確認します。
 
