@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 OnMenuItemClickListener { item: MenuItem? ->
                     language()
                     true
-                }
+                },
             )
         root.addView(toolbar, android.widget.LinearLayout.LayoutParams(-1, -2))
         tabs = TabLayout(this)
@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onTabUnselected(tab: Tab?) {}
 
                 override fun onTabReselected(tab: Tab?) {}
-            }
+            },
         )
         val initial: Int = if (state == null) 0 else state.getInt("tab", 0)
         val selected = tabs!!.getTabAt(max(0, min(initial, tabs!!.getTabCount() - 1)))
@@ -125,12 +125,12 @@ class MainActivity : AppCompatActivity() {
         enabled!!.setId(R.id.module_enabled)
         enabled!!.setText(R.string.enabled)
         enabled!!.setTextAppearance(
-            com.google.android.material.R.style.TextAppearance_Material3_TitleMedium
+            com.google.android.material.R.style.TextAppearance_Material3_TitleMedium,
         )
         enabled!!.setMinHeight(dp(56))
         enabled!!.setChecked(
             ConfigProvider.settings(this)!!.getBoolean("enabled", true) &&
-                !ConfigProvider.settings(this)!!.getBoolean("blocked", false)
+                !ConfigProvider.settings(this)!!.getBoolean("blocked", false),
         )
         master.addView(enabled, android.widget.LinearLayout.LayoutParams(-1, -2))
         master.addView(text(getString(R.string.enabled_note), false))
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
                 ConfigProvider.settings(this)!!.edit().putBoolean("enabled", checked).apply()
                 ConfigProvider.changed(this)
                 refreshStatus()
-            }
+            },
         )
         val state = card(page, false)
         state.addView(text(getString(R.string.status_title), true))
@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity() {
         state.addView(status)
         val refresh = button(getString(R.string.settings_refresh))
         refresh.setOnClickListener(
-            android.view.View.OnClickListener { v: View? -> refreshStatus() }
+            android.view.View.OnClickListener { v: View? -> refreshStatus() },
         )
         state.addView(refresh)
         val looks = card(page, false)
@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                     ConfigProvider.settings(this)!!.edit().putInt("font", font).apply()
                     ConfigProvider.changed(this)
                 }
-            }
+            },
         )
         looks.addView(slider, android.widget.LinearLayout.LayoutParams(-1, -2))
         looks.addView(text(getString(R.string.appearance_note), false))
@@ -186,21 +186,23 @@ class MainActivity : AppCompatActivity() {
             android.view.View.OnClickListener { v: View? ->
                 try {
                     startActivity(
-                        Intent(Intent.ACTION_DIAL).setPackage("com.samsung.android.dialer")
+                        Intent(Intent.ACTION_DIAL).setPackage("com.samsung.android.dialer"),
                     )
                 } catch (e: ActivityNotFoundException) {
                     Toast.makeText(this, R.string.not_installed, Toast.LENGTH_SHORT).show()
                 }
-            }
+            },
         )
         setup.addView(dialer)
         val copy = button(getString(R.string.copy_code))
         copy.setOnClickListener(
             android.view.View.OnClickListener { v: View? ->
                 getSystemService<ClipboardManager?>(ClipboardManager::class.java)
-                    .setPrimaryClip(ClipData.newPlainText(getString(R.string.dial_code), "*#0011#"))
+                    ?.setPrimaryClip(
+                        ClipData.newPlainText(getString(R.string.dial_code), "*#0011#"),
+                    )
                 Toast.makeText(this, R.string.code_copied, Toast.LENGTH_SHORT).show()
-            }
+            },
         )
         setup.addView(copy)
     }
@@ -247,14 +249,14 @@ class MainActivity : AppCompatActivity() {
                 ConfigProvider.changed(this)
                 enabled!!.setChecked(true)
                 refreshStatus()
-            }
+            },
         )
         guard.addView(reset)
         val licenses = button(getString(R.string.legal_title))
         licenses.setOnClickListener(
             android.view.View.OnClickListener { v: View? ->
                 startActivity(Intent(this, LicensesActivity::class.java))
-            }
+            },
         )
         page.addView(licenses, android.widget.LinearLayout.LayoutParams(-1, -2))
     }
@@ -269,7 +271,7 @@ class MainActivity : AppCompatActivity() {
                     which: Int ->
                     val tag: String? = if (which == 1) "ja" else if (which == 2) "en" else ""
                     getSystemService<LocaleManager?>(LocaleManager::class.java)
-                        .setApplicationLocales(LocaleList.forLanguageTags(tag))
+                        ?.setApplicationLocales(LocaleList.forLanguageTags(tag))
                 },
             )
             .show()
@@ -358,8 +360,8 @@ class MainActivity : AppCompatActivity() {
         card.setCardBackgroundColor(
             color(
                 if (master) com.google.android.material.R.attr.colorPrimaryContainer
-                else com.google.android.material.R.attr.colorSurfaceContainerLow
-            )
+                else com.google.android.material.R.attr.colorSurfaceContainerLow,
+            ),
         )
         val body = vertical()
         body.setPadding(dp(20), dp(16), dp(20), dp(16))
@@ -387,7 +389,7 @@ class MainActivity : AppCompatActivity() {
         result.setText(value)
         result.setTextAppearance(
             if (heading) com.google.android.material.R.style.TextAppearance_Material3_TitleMedium
-            else com.google.android.material.R.style.TextAppearance_Material3_BodyMedium
+            else com.google.android.material.R.style.TextAppearance_Material3_BodyMedium,
         )
         result.setLineSpacing(dp(3).toFloat(), 1f)
         return result

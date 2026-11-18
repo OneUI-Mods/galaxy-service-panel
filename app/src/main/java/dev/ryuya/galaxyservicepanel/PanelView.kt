@@ -103,7 +103,7 @@ class PanelView(context: Context, selected: IntConsumer, failed: Consumer<Throwa
                                     .getSystemService<ClipboardManager?>(
                                         ClipboardManager::class.java,
                                     )
-                                    .setPrimaryClip(
+                                    ?.setPrimaryClip(
                                         ClipData.newPlainText("Service Mode", row!!.raw),
                                     )
                             },

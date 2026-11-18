@@ -83,7 +83,10 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
         this.host = host
         nativeList = list
         nativeAdapter = adapter
-        content = host.findViewById<ViewGroup?>(android.R.id.content)
+        content =
+            checkNotNull(host.findViewById<ViewGroup>(android.R.id.content)) {
+                "Service Mode content unavailable"
+            }
         guard = PhoneGuard(host)
         data =
             object : DataSetObserver() {
@@ -150,9 +153,9 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                         } catch (error: Throwable) {
                             fail(error)
                         }
-                    }
+                    },
                 )
-            }
+            },
         )
     }
 
@@ -193,7 +196,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                 } catch (error: Throwable) {
                     fail(error)
                 }
-            }
+            },
         )
         // Native menu titles are kept exact because Samsung dispatches these actions by title.
         host.onCreateOptionsMenu(toolbar.getMenu())
@@ -209,14 +212,14 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                                         .getContentResolver()
                                         .call(ConfigProvider.URI!!, "disable", null, null)
                                 } catch (ignored: RuntimeException) {}
-                            }
+                            },
                         )
                     } else host.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, item!!)
                 } catch (error: Throwable) {
                     fail(error)
                 }
                 true
-            }
+            },
         )
         nextRoot.addView(toolbar, android.widget.LinearLayout.LayoutParams(-1, -2))
         val nextPanel =
@@ -231,7 +234,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                 val bars = insets!!.getInsets(Type.systemBars() or Type.displayCutout())
                 view!!.setPadding(bars.left, bars.top, bars.right, bars.bottom)
                 insets!!
-            }
+            },
         )
         for (i in 0 until content.getChildCount()) {
             val child = content.getChildAt(i)
@@ -349,7 +352,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                     restore()
                 } catch (ignored: Throwable) {}
                 PanelController.status(host, "blocked")
-            }
+            },
         )
         Log.e(
             "GalaxyServicePanel",
@@ -378,7 +381,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                     val thread = Thread(r, "ServicePanelConfig")
                     thread.setDaemon(true)
                     thread
-                }
+                },
             )
 
         @JvmStatic
@@ -460,7 +463,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
                             .getContentResolver()
                             .call(ConfigProvider.URI!!, "status", null, data)
                     } catch (ignored: RuntimeException) {}
-                }
+                },
             )
         }
     }

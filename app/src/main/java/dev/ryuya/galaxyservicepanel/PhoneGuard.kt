@@ -52,7 +52,8 @@ class PhoneGuard(context: Context) {
                 val exits =
                     context
                         .getSystemService<ActivityManager?>(ActivityManager::class.java)
-                        .getHistoricalProcessExitReasons(ConfigProvider.TARGET, previousPid, 4)
+                        ?.getHistoricalProcessExitReasons(ConfigProvider.TARGET, previousPid, 4)
+                        .orEmpty()
                 for (exit in exits) {
                     val reason: ExitEvidence.Reason =
                         when (exit.getReason()) {
