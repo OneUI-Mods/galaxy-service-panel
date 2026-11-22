@@ -32,8 +32,9 @@ import java.util.ArrayList
 import java.util.List
 import java.util.Objects
 import java.util.WeakHashMap
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.ThreadFactory
 import java.util.function.Consumer
 import java.util.function.IntConsumer
@@ -112,7 +113,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
         if (destroyed || querying) return
         querying = true
         val generation: Long = settingsGeneration
-        PanelController.IO!!.execute(
+        PanelController.IO.execute(
             Runnable {
                 var read: PanelController.Preferences? = null
                 try {
@@ -205,7 +206,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
             OnMenuItemClickListener { item: MenuItem? ->
                 try {
                     if (item!!.getItemId() == 0x47535001) {
-                        PanelController.IO!!.execute(
+                        PanelController.IO.execute(
                             Runnable {
                                 try {
                                     host
@@ -375,14 +376,17 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
     companion object {
         private val ACTIVE: MutableMap<Activity?, WeakReference<PanelController?>?> =
             WeakHashMap<Activity?, WeakReference<PanelController?>?>()
-        private val IO: ExecutorService? =
-            Executors.newSingleThreadExecutor(
-                ThreadFactory { r: Runnable? ->
-                    val thread = Thread(r, "ServicePanelConfig")
-                    thread.setDaemon(true)
-                    thread
-                },
-            )
+        private val IO = ThreadPoolExecutor(
+            1, 1, 10, TimeUnit.SECONDS, LinkedBlockingQueue<Runnable>(),
+            ThreadFactory { task -> Thread(task, "ServicePanelConfig").apply { isDaemon = true } },
+        ).apply { allowCoreThreadTimeOut(true) }
+
+        internal fun canRetire() =
+            ACTIVE.values.none { it?.get() != null } && IO.activeCount == 0 && IO.queue.isEmpty()
+
+        internal fun retire() {
+            IO.shutdown()
+        }
 
         @JvmStatic
         fun created(activity: Activity) {
@@ -454,7 +458,7 @@ private constructor(host: Activity, list: ListView, adapter: ArrayAdapter<*>) {
 
         @JvmStatic
         private fun status(context: Context, state: String?) {
-            PanelController.IO!!.execute(
+            PanelController.IO.execute(
                 Runnable {
                     try {
                         val data = Bundle()

@@ -56,3 +56,7 @@ Javaはgoogle-java-format、PythonはBlackの100桁を使用します。対象OS
 [変更内容と検証範囲](efficiency.md)を参照してください。
 
 [Build environment / ビルド環境](build-environment.md)
+
+## 電話プロセスを維持した開発更新
+
+Service Modeを閉じ、画面の設定更新が終わっているときに、libxposed API 102でフックの実装を更新できます。対応版が一度読み込まれた状態で、同じ署名の新しいAPKを上書きします。更新時にモデム操作やActivity起動は行いません。適用は `ONEUI_MODS_HOT_RELOAD` のversionCodeと電話プロセスのPIDで確認します。
